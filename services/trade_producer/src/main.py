@@ -1,58 +1,55 @@
+from typing import Dict, List
+
+from loguru import logger
 from quixstreams import Application
 
-from typing import List, Dict
-
 from src.kraken_api import KrakenWebsocketTradeAPI
+from src import config
 
 
-def produce_trades(kaka_broker_address: str,kaka_topic_name: str) -> None:
-     """
-     Reads trades from the Kraken websocket API and saves them into a Kafka topic
+def produce_trades(kaka_broker_address: str, kaka_topic_name: str,product_id: str) -> None:
+    """
+    Reads trades from the Kraken websocket API and saves them into a Kafka topic
 
-     Args:
-         kaka_broker_address (str): The address of the Kafka broker.
-         kaka_topic_name (str): The name of the Kafka topic.
+    Args:
+        kaka_broker_address (str): The address of the Kafka broker.
+        kaka_topic_name (str): The name of the Kafka topic.
+        product_id (str): currency pair
 
-     Returns:
-         Live trades
-     """
-     app = Application(broker_address=kaka_broker_address)
+    Returns:
+        Live trades
+    """
+    app = Application(broker_address=kaka_broker_address)
 
-     # the topic where we will save the trades
-     topic = app.topic(name=kaka_topic_name, value_serializer='json')
+    # the topic where we will save the trades
+    topic = app.topic(name=kaka_topic_name, value_serializer='json')
 
-     # Create an instance of the Kraken API
-     kraken_api = KrakenWebsocketTradeAPI(product_id='BTC/USD')
+    # Create an instance of the Kraken API
+    kraken_api = KrakenWebsocketTradeAPI(product_id=product_id)
 
-    #  print('Creating the producer...')
+    logger.info('Creating the producer...')
 
-     # Create a Producer instance
-     with app.get_producer() as producer:
+    # Create a Producer instance
+    with app.get_producer() as producer:
+        while True:
+            # Get the trades from the Kraken API class with typed hints
+            trades: List[Dict] = kraken_api.get_trades()
 
-         while True:
+            for trade in trades:
+                # Serialize an event using the defined Topic
+                message = topic.serialize(key=trade['product_id'], value=trade)
 
-             # Get the trades from the Kraken API class with typed hints
-             trades : List[Dict] = kraken_api.get_trades()
-            
-             for trade in trades:
-                 # Serialize an event using the defined Topic 
-                 message = topic.serialize(key=trade["product_id"],value=trade)
+                # Produce a message into the Kafka topic
+                producer.produce(topic=topic.name, value=message.value, key=message.key)
 
-                 # Produce a message into the Kafka topic
-                 producer.produce(
-                     topic=topic.name,
-                     value=message.value,
-                     key=message.key
-                 )
+                logger.info('Message sent!')
 
-                 print('Message sent!')
+            from time import sleep
 
-             from time import sleep
-             sleep(1)
+            sleep(1)
+
 
 if __name__ == '__main__':
-
-     produce_trades(
-         kaka_broker_address="localhost:19092",
-         kaka_topic_name="trade"
-     )
+    produce_trades(kaka_broker_address= config.kaka_broker_address,
+                   kaka_topic_name= config.kaka_topic_name, 
+                   product_id = config.product_id)
