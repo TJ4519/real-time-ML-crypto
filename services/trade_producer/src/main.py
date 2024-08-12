@@ -4,10 +4,13 @@ from loguru import logger
 from quixstreams import Application
 
 from src.kraken_api import KrakenWebsocketTradeAPI
-from src import config
+from src.config import config
 
 
-def produce_trades(kaka_broker_address: str, kaka_topic_name: str,product_id: str) -> None:
+def produce_trades(kaka_broker_address: str, 
+                   kaka_topic_name: str, 
+                   product_id: str
+                   ) -> None:
     """
     Reads trades from the Kraken websocket API and saves them into a Kafka topic
 
@@ -42,14 +45,20 @@ def produce_trades(kaka_broker_address: str, kaka_topic_name: str,product_id: st
                 # Produce a message into the Kafka topic
                 producer.produce(topic=topic.name, value=message.value, key=message.key)
 
-                logger.info('Message sent!')
+                logger.info(f'Message sent to first kafka topic: {trade}')
 
             from time import sleep
 
-            sleep(1)
+            sleep(0.5)
 
 
 if __name__ == '__main__':
-    produce_trades(kaka_broker_address= config.kaka_broker_address,
-                   kaka_topic_name= config.kaka_topic_name, 
-                   product_id = config.product_id)
+    #produce_trades()
+
+
+    produce_trades(kaka_broker_address=config.kafka_broker_address,
+                   #'localhost:19092',
+                   #'redpanda-0:9092',
+                   kaka_topic_name=config.kafka_topic_name,
+                   product_id = config.product_id,
+                   )

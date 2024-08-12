@@ -6,6 +6,9 @@ ENV PYTHONPATH=/app
 # Stream output to console
 ENV PYTHONUNBUFFERED=1
 
+# Indicate that the app is running in Docker
+ENV RUNNING_IN_DOCKER=true  
+
 # Install poetry inside the container
 RUN pip install poetry
 
