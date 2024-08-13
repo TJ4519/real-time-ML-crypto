@@ -57,8 +57,6 @@ if __name__ == '__main__':
 
 
     produce_trades(kaka_broker_address=config.kafka_broker_address,
-                   #'localhost:19092',
-                   #'redpanda-0:9092',
                    kaka_topic_name=config.kafka_topic_name,
                    product_id = config.product_id,
                    )

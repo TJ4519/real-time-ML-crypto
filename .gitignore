@@ -191,3 +191,6 @@ trust_policy.json
 ca.cert
 *.pkl
 **/state
+
+# Ignore the .env file that contains the API key within the kafka_to_feature_store microservice
+services/kafka_to_feature_store/.env

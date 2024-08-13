@@ -3,6 +3,11 @@ from quixstreams import Application
 from datetime import timedelta
 from loguru import logger
 
+#TODO fix config params
+#from src.config import config
+
+
+
 def trade_to_ohlc(
         kaka_input_topic: str,
         kaka_output_topic: str,
@@ -27,6 +32,7 @@ def trade_to_ohlc(
     # Note on adding consumer group:
     # By specifying consumer_grpup, which is a parameter in kafka topcics, scaling can be achieved. Negating the conumer_group, prevents the consumers of kafka to scale ]
     # horizontally in the event that the producer may log data into the topics at a higher throughput-which might be the case if one switches to another api
+    
     app = Application(
         broker_address=kaka_broker_address,
         consumer_group="trade_to_ohlc",
@@ -42,10 +48,11 @@ def trade_to_ohlc(
     # streamingdatafarmes sdf 
     sdf = app.dataframe(topic=input_topic)
 
+
     # Incoming stream transformed. quixstreams shows how to use tumbling windows for streaming dataframe transformations see link for windows and aggreagations in the quixstreams doc:
     # https://quix.io/docs/quix-streams/windowing.html#updating-window-definitions
 
-    ##############################################################################################
+    
     # Function that established the logic for transforming data when initialising tumbling window
     def _init_ohlc_candle(value: dict) -> dict:
         """
@@ -56,7 +63,7 @@ def trade_to_ohlc(
         """
 
         return {
-            # "timestamp" : value["timestamp"],
+            "timestamp" : value["timestamp"],
             "open": value["price"],
             "high": value["price"],
             "low": value["price"],
@@ -79,12 +86,13 @@ def trade_to_ohlc(
             dict: the updated OHLC candle
         """
         return {
-            # "timestamp": ohlc_candle["timestamp"],
+            "timestamp": ohlc_candle["timestamp"],
             "open": ohlc_candle["open"],
             "high": max(ohlc_candle["high"], trade["price"]),
             "low": min(ohlc_candle["high"], trade["price"]),
             "close": trade["price"],
-            "product_id" : trade["product_id"],#
+            "product_id" : trade["product_id"],
+            #
         }
     ##############################################################################################
     
@@ -99,13 +107,19 @@ def trade_to_ohlc(
     sdf['high'] = sdf['value']['high']
     sdf['low'] = sdf['value']['low']
     sdf['close'] = sdf['value']['close']
-    sdf['product_id'] = sdf['product_id']
+    sdf['product_id'] = sdf['value']['product_id']
 
     # add timestamp key
     sdf['timestamp'] = sdf['end']
 
 
-    sdf = sdf [['timestamp', 'open', 'high', 'low', 'close','product_id']]
+    sdf = sdf [['timestamp',
+                'product_id', 
+                'open', 
+                'high', 
+                'low', 
+                'close',
+                ]]
 
 
     sdf = sdf.update(logger.info)
@@ -124,10 +138,10 @@ if __name__ == '__main__':
 
         kaka_input_topic = 'trade' ,
         kaka_output_topic = 'ohlc',
-        kaka_broker_address = 'localhost:19092' ,
+        kaka_broker_address = 'localhost:19092' , #local external port, 
         ohlc_windows_seconds = 2,
         # kaka_input_topic = config.kafka_input_topic ,
-        # kaka_output_topic = config.kafka_out,
+        # kaka_output_topic = config.kafka_output_topic,
         # kaka_broker_address = config.kafka_broker_address ,
         # ohlc_windows_seconds = config.ohlc_windows_seconds,
 
