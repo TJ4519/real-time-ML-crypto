@@ -6,7 +6,11 @@ authors = ["TJ4519 <tejasbirsingh@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.13"
+loguru = "^0.7.2"
+python-dotenv = "^1.0.1"
+pydantic-settings = "^2.4.0"
+hopsworks = "^3.7.0"
 
 
 [build-system]

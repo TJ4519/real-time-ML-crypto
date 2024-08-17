@@ -4,7 +4,8 @@ from loguru import logger
 from quixstreams import Application
 
 from src.kraken_api import KrakenWebsocketTradeAPI
-from src.config import config
+from src.config import config_kraken_to_trade
+
 
 
 def produce_trades(kaka_broker_address: str, 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     #produce_trades()
 
 
-    produce_trades(kaka_broker_address=config.kafka_broker_address,
-                   kaka_topic_name=config.kafka_topic_name,
-                   product_id = config.product_id,
+    produce_trades(kaka_broker_address=config_kraken_to_trade.kafka_broker_address,
+                   kaka_topic_name=config_kraken_to_trade.kafka_topic_name,
+                   product_id = config_kraken_to_trade.product_id,
                    )
