@@ -72,3 +72,6 @@ class KrakenWebsocketTradeAPI:
             # breakpoint()
 
             return trades
+    #Cheeky 
+    def is_done(self) -> bool:
+        return False

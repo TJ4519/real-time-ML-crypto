@@ -12,9 +12,14 @@ print("KAFKA_BROKER_ADDRESS:", os.getenv('KAFKA_BROKER_ADDRESS'))
 # print("OHLC_WINDOW_SECONDS:", os.getenv('OHLC_WINDOW_SECONDS')) - add back into trade_to_ohlc
 
 class Config(BaseSettings):
-    product_id: str = 'BTC/EUR'
+    product_id: str = 'BTC/USD'
     kafka_broker_address: str = os.getenv('KAFKA_BROKER_ADDRESS', 'default_broker_address')
     kafka_topic_name: str = 'trade'
+
+
+    # Validate using pydantic
+    live_or_historical:str = 'live'
+    last_n_days: int = 1 # The int is refering to days
     # ohlc_windows_seconds: int = int(os.getenv('OHLC_WINDOW_SECONDS', '10'))  # Default to 10s if not set - add back into trade_to_ohlc
 
     # Print to debug initialized settings
