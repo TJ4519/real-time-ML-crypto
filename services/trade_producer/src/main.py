@@ -44,12 +44,12 @@ def produce_trades(kaka_broker_address: str,
     if live_or_historical == 'live':
         kraken_api = KrakenWebsocketTradeAPI(product_id=product_id)
     else: 
-        # Compute timestamps in milliseconds
-        import time
-        to_ms = int(time.time()*1000) # Init (milliseconds) the current point in time when asking to retrieve backwards looking data 
-        from_ms = to_ms - last_n_days*24*60*60*1000 # the earliest point in time depending on how many days back you want. Days var converted into milliseconds ofc
+        # TODO Delete the from_ms and to_ms calculation within main.py since they've moved to the restapi class
         
-        kraken_api = KrakenRestAPI(product_ids=[product_id],from_ms=from_ms, to_ms=to_ms)
+        kraken_api = KrakenRestAPI(product_ids=[product_id],
+                                   last_n_days = last_n_days,
+                                   
+                                   )
 
 
     
