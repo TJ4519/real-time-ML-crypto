@@ -16,7 +16,7 @@ class Config(BaseSettings):
     kafka_broker_address: str = os.getenv('KAFKA_BROKER_ADDRESS', 'default_broker_address')
     kafka_input_topic_name: str = 'trade'
     kafka_output_topic_name: str = 'ohlc'
-    ohlc_windows_seconds: int = 2 # Units: seconds
+    ohlc_windows_seconds: int = 10 # Units: seconds
     
     # int(os.getenv('OHLC_WINDOW_SECONDS', '10'))  # Default to 10s if not set - add back into trade_to_ohlc
 
@@ -25,7 +25,7 @@ class Config(BaseSettings):
     def __post_init__(self):
         print(f"Configured product_id: {self.product_id}")
         print(f"Configured kafka_broker_address: {self.kafka_broker_address}")
-        print(f"Configured kafka_topic_name: {self.kafka_topic_name}")
+        print(f"Configured kafka_topic_name: {self.kafka_input_topic_name}")
         print(f"Configured ohlc_windows_seconds: {self.ohlc_windows_seconds}") #- add back into trade_to_ohlc
 
 # Creating a configuration instance

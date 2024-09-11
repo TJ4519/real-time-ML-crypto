@@ -1,6 +1,6 @@
 ## A servless machine learning pipeline that predicts crypto changes over short term
 
-![ML Pipeline plan](image.png)
+![ML Pipeline plan]![alt text](image-1.png)
 
 ## Current Status
 

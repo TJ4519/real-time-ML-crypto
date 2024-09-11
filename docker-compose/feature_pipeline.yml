@@ -1,0 +1,40 @@
+version: "3.11"
+name: feature_pipeline
+networks:
+  name: redpanda_network
+  driver: bridge
+services:
+  trade_producer:
+  build:
+    contaner_name: trade_producer
+    context: ../services/trade_producer
+    dockerfile: Dockerfile
+    networks: 
+      -redpanda_network
+    environment:
+      KAFKA_BROKER_ADDRESS: redpanda-0:9092
+  trade_to_ohlc:
+    container_name: trade_to_ohlc
+    build:
+      context: ../services/trade_to_ohlc
+    networks:
+      - redpanda_network
+    environment:
+      KAFKA_BROKER_ADDRESS: redpanda-0:9092
+      OHLC_WINDOW_SECONDS: 60
+
+    kafka_to_feature_store:
+      container_name: kafka_to_feature_store
+      build:
+        context: ../services/kafka_to_feature_store
+      networks:
+        -redpanda_network
+      environment:
+        KAFKA_BROKER_ADDRESS: redpanda-0:9092
+      # pass variables hidden in env files - specifically env.docker files
+        ev_file:
+          - ../services/kafka_to_feature_store/.env.docker
+
+
+    
+  
