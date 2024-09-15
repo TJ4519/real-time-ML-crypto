@@ -5,12 +5,15 @@ Fig 1. Schema of pipeline components. Data Source is a websocket or restapi from
 
 ## Current Status
 
+Needs doing:
+[X] - Fixing both the feature_pipeline.yml and backfill_pipeline.yml dependancies and integrate them with dev and local settings
+[X] - Fix historical timestamp issue for trade_to_ohlc 
+
 
 ### Feature Pipeline
 - **Trade Producer Microservice**: Runs locally and within Docker containers
-- **Trade to OHLC Conversion**: Runs locally and within Docker containers
-- **Trade to OHLC Conversion**: Runs locally and within Docker containers 
-- **Note**: Whilst all three services are production ready, desired changes to restapi.py file still needed to accomodate multiple currency pairs (list)
+- **Trade to OHLC Conversion**: Runs locally and within Docker containers for live. NOTE: FIX Timestamp issue for historic pipeline. In historical pipeline, the timestamps for candlesticks is not the one that corresponds to their historic timestamp. It's the latest timestamp
+- **Kafka to Hopsworks**: Runs locally. Test with makefiles and dev
+
 
 ### Data Management
-- **OHLC Data Storage**: The process to store OHLC data in the Hopsworks Feature Store needs to be addressed and API 
