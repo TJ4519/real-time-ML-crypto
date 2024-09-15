@@ -6,6 +6,44 @@ from loguru import logger
 import datetime
 #from src.config import config_kraken_to_trade
 
+class KrakenRestAPIMultipleProducts:
+    def __init__(self, product_ids: List[str], last_n_days: int) -> None:
+        """
+        Initialise a set of objects, for each of the elements of the product_ids aka currency pair list,
+        that take after the KrakenRestAPI class blueprint.
+        """
+        self.product_ids = product_ids
+        self.kraken_apis = [KrakenRestAPI(product_ids=[product_id], last_n_days=last_n_days) for product_id in product_ids]
+
+    def get_trades(self) -> List[Dict]:
+        """
+        Bring back the collection of trades in a dictionary containing each of the currency pair object classes
+        that take after the KrakenRestAPI class.
+
+        Args:
+            None
+
+        Returns:
+            List[Dict]: A list of dicts where each dict has the currency pair, as initialised by the dictates of the self.product_ids.
+        """
+        trades = []
+        for kraken_api in self.kraken_apis:
+            # this is_done() is quite useful don't omit
+            if kraken_api.is_done():
+                continue
+            trades.extend(kraken_api.get_trades())
+        return trades
+
+    def is_done(self) -> bool:
+        """
+        Check if all KrakenRestAPI instances are done fetching trades.
+
+        Returns:
+            bool: True if all instances are done, False otherwise.
+        """
+        return all(kraken_api.is_done() for kraken_api in self.kraken_apis)
+
+# Existing KrakenRestAPI class remains unchanged
 
 class KrakenRestAPI:
     
@@ -133,7 +171,7 @@ class KrakenRestAPI:
         #Debugger to see trades before the filtering mechanism using from_ms
         logger.debug(f"Total amount of trades = {len(trades)}")
         logger.debug(f"Trades before filtering: {trades}")
-        breakpoint()
+        # breakpoint()
         
         
         # Apply Filtering

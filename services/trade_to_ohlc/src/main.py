@@ -3,8 +3,8 @@ from quixstreams import Application
 from datetime import timedelta
 from loguru import logger
 
-#TODO fix config params
-#from src.config import config
+
+from config import config_trade_to_ohlc #from src.config import config_trade_to_ohlc doesn't work like it does for main.trade_producer. Root library might be in this service
 
 
 
@@ -17,6 +17,12 @@ def trade_to_ohlc(
     """
     Takes the stream of trading information from the input kafka topic address, slices the data into a window measured in seconds, to create candles for open, close, high and low
     The "candlestick" data is stored in another output for feature storage
+
+    NOTE:
+    The Quixstreams library might expect timestamps to be in a consistent format, and the aggregation function might not be handling the different formats properly. Specifically:
+
+    ISO 8601 format: This format is a string representation of a date and time.
+    Unix timestamp: This is an integer representation of seconds (or milliseconds, depending on implementation) since January 1, 1970 (the Unix epoch).
 
 
 
@@ -36,7 +42,7 @@ def trade_to_ohlc(
     app = Application(
         broker_address=kaka_broker_address,
         consumer_group="trade_to_ohlc",
-        auto_offset_reset= 'earliest', 
+        auto_offset_reset= 'latest', 
         #could pick 'latest' which tells the application to retrieve the latest messages in the input topic.
     )
 
@@ -61,7 +67,12 @@ def trade_to_ohlc(
         Once initialised, the update mechanism needs to also be applied
 
         """
-
+        logger.debug(f"Received value for OHLC initialization: {value}")
+        
+        timestamp = value.get("timestamp") or value.get("time")
+        if not timestamp:
+            logger.warning(f"Missing timestamp in value: {value}")
+            return None
         return {
             "timestamp" : value["timestamp"],
             "open": value["price"],
@@ -92,9 +103,9 @@ def trade_to_ohlc(
             "low": min(ohlc_candle["high"], trade["price"]),
             "close": trade["price"],
             "product_id" : trade["product_id"],
-            #
+            
         }
-    ##############################################################################################
+   
     
     
     # apply transformations and make candles
@@ -132,18 +143,14 @@ def trade_to_ohlc(
 
 if __name__ == '__main__':
 
-    from src.config import config
+    # app.clear_state()  #USE TO CLEAR CACHE IF TOPIC INCASE TOPIC STATE IS GIVING ERRORS
 
     trade_to_ohlc(
 
-        kaka_input_topic = 'trade' ,
-        kaka_output_topic = 'ohlc',
-        kaka_broker_address = 'localhost:19092' , #local external port, 
-        ohlc_windows_seconds = 2,
-        # kaka_input_topic = config.kafka_input_topic ,
-        # kaka_output_topic = config.kafka_output_topic,
-        # kaka_broker_address = config.kafka_broker_address ,
-        # ohlc_windows_seconds = config.ohlc_windows_seconds,
+        kaka_input_topic = config_trade_to_ohlc.kafka_input_topic_name ,
+        kaka_output_topic = config_trade_to_ohlc.kafka_output_topic_name,
+        kaka_broker_address = config_trade_to_ohlc.kafka_broker_address ,
+        ohlc_windows_seconds = config_trade_to_ohlc.ohlc_windows_seconds,
 
     )
     

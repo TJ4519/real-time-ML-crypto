@@ -7,7 +7,7 @@ from src.config import config_kraken_to_trade
 
 from src.kraken_api.websocket import KrakenWebsocketTradeAPI
 from src.kraken_api.restapi import KrakenRestAPI
-
+from src.kraken_api.restapi import KrakenRestAPIMultipleProducts
 
 
 
@@ -44,11 +44,13 @@ def produce_trades(kaka_broker_address: str,
     if live_or_historical == 'live':
         kraken_api = KrakenWebsocketTradeAPI(product_id=product_id)
     else: 
-        # TODO Delete the from_ms and to_ms calculation within main.py since they've moved to the restapi class
+        # TODO Add back the multiple product ID fix using using KrakenRestAPIMultipleProducts
         
+        # kraken_api = KrakenRestAPIMultipleProducts(product_ids=[product_id],
+        #                            last_n_days = last_n_days,
+        #                            )
         kraken_api = KrakenRestAPI(product_ids=[product_id],
                                    last_n_days = last_n_days,
-                                   
                                    )
 
 

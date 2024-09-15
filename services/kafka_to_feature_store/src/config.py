@@ -28,9 +28,15 @@ class Config(BaseSettings):
     kafka_broker_address: str = os.getenv('KAFKA_BROKER_ADDRESS', 'default_broker_address')
     kafka_topic_name: str = 'ohlc'
     hopsworks_project_name: str = os.getenv('HOPSWORKS_PROJECT_NAME')
+
+    live_or_historical:str = 'historical'
     hopsworks_api_key: str = os.getenv('HOPSWORKS_API_KEY')
     feature_group_name: str = 'ohlc_feature_group'
     feature_store_version: int = 1  # Default version
+
+    buffer_size: int = 150000
+    save_every_n_sec: int = 30 
+    create_new_consumer_group: bool = True
 
     # Print to debug initialized settings
     def __post_init__(self):
@@ -50,3 +56,4 @@ print("KAFKA_BROKER_ADDRESS:", config_kafka_to_hops.kafka_broker_address)
 print("HOPSWORKS_API_KEY:", config_kafka_to_hops.hopsworks_api_key)
 print("HOPSWORKS_PROJECT_NAME:", config_kafka_to_hops.hopsworks_project_name)
 print("feature_group_name:", config_kafka_to_hops.feature_group_name)
+print("feature_group_name:", config_kafka_to_hops.live_or_historical)
