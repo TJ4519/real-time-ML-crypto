@@ -4,7 +4,9 @@ import requests
 from typing import List,Dict,Tuple
 from loguru import logger
 import datetime
-#from src.config import config_kraken_to_trade
+from src.kraken_api.trade import Trade
+from typing import Optional
+
 
 class KrakenRestAPIMultipleProducts:
     def __init__(self, product_ids: List[str], last_n_days: int) -> None:
@@ -13,9 +15,11 @@ class KrakenRestAPIMultipleProducts:
         that take after the KrakenRestAPI class blueprint.
         """
         self.product_ids = product_ids
-        self.kraken_apis = [KrakenRestAPI(product_ids=[product_id], last_n_days=last_n_days) for product_id in product_ids]
+        self.kraken_apis = [
+            KrakenRestAPI(product_id=product_id, last_n_days=last_n_days) for product_id in product_ids
+            ]
 
-    def get_trades(self) -> List[Dict]:
+    def get_trades(self) -> List[dict]: 
         """
         Bring back the collection of trades in a dictionary containing each of the currency pair object classes
         that take after the KrakenRestAPI class.
@@ -24,7 +28,7 @@ class KrakenRestAPIMultipleProducts:
             None
 
         Returns:
-            List[Dict]: A list of dicts where each dict has the currency pair, as initialised by the dictates of the self.product_ids.
+            List[Trade]: A list of dicts  where each dict has the currency pair, as initialised by the dictates of the self.product_ids.
         """
         trades = []
         for kraken_api in self.kraken_apis:
@@ -63,16 +67,16 @@ class KrakenRestAPI:
     def __init__( 
                 self, 
                 # TODO come back and fix this to include multiple product_ids
-                product_ids: List[str],
+                product_id: str,
                 last_n_days: int,
-                
+                #cache_dir: Optional[int]
                 )-> None:
         """
         Initialise this class with the possibility of multiple currency pairs which can be specified in the product_ids
         and the to and from backwards looking time intervals 
 
         Args:
-        product_ids (List[str]): A list of product IDS aka currency pairs (BTC/USD,ETH/USD ETC.) for which historic data is fetched
+        product_ids (str): A single product ID from the set of initialised currency pairs in product_ids (BTC/USD,ETH/USD ETC.) for which historic data is fetched
         
         last_n_days (int): Pass the total number of days for which you want the trades. from and to timestamps are calculated within the class
         
@@ -80,13 +84,13 @@ class KrakenRestAPI:
             none
         """
         
-        if isinstance(product_ids, str):
-            product_ids = [product_ids]  # Convert single string to a list
+        # if isinstance(product_ids, str):
+        #     product_ids = [product_ids]  # Convert single string to a list
         
         
         # Instatiate variables. from and to_ms are calculated using a static method called _init_from_ms_and_from_ms
 
-        self.product_ids = product_ids 
+        self.product_id = product_id
         #self.from_ms,self.to_ms = self._init_from_ms_and_from_ms(last_n_days) #this should work
         self.to_ms, self.from_ms = self._init_from_ms_and_from_ms(last_n_days)
         self.last_trade_ms = self.to_ms 
@@ -95,12 +99,12 @@ class KrakenRestAPI:
             
         self._is_done = False # to be flipped and flopped
         
-        logger.info(f"Initialized KrakenRestAPI with product_ids: {self.product_ids}, from_ms: {self.from_ms}, to_ms: {self.to_ms}")
+        logger.info(f"Initialized KrakenRestAPI with product_ids: {self.product_id}, from_ms: {self.from_ms}, to_ms: {self.to_ms}")
 
 
     # %% Compute the from_ms and to_ms
-    #@staticmethod
-    def _init_from_ms_and_from_ms(self,last_n_days:int)-> Tuple [int,int]:
+    @staticmethod
+    def _init_from_ms_and_from_ms(last_n_days:int)-> Tuple [int,int]:
         """
         Returns from_ms and to_ms timestamps for the backwards looking data
 
@@ -121,15 +125,17 @@ class KrakenRestAPI:
         return from_ms, to_ms
     
     # %%
-    def get_trades(self)-> List[Dict]:
+    def get_trades(self)-> List[Trade]:
         """
+        Notes on getting historical trades:
+        The timestamp
         Backwards looking data from kraken is retrieved in batches of max. 1000 trades
 
         Args:
             None
 
         Returns:
-            List[Dict] : A list of dicts, each dict is of a trade containing info like : {'product_id': 'BTC/EUR', 'price': 54255.9, 'volume': 0.00189445, 'timestamp': '2024-08-18T16:08:24.768249Z'}
+            List[Trade] : A list of Trade objects, each dict object is of a trade containing info like : {'product_id': 'BTC/EUR', 'price': 54255.9, 'volume': 0.00189445, 'timestamp': '2024-08-18T16:08:24.768249Z'}
         
         """
          
@@ -143,7 +149,7 @@ class KrakenRestAPI:
         # NOTE: from_ms needs to be consistent in seconds units that is used by kraken URL for GET
 
         since_time_in_seconds = self.last_trade_ms // 1000 # convert the earliest timsetamp into seconds (last_trade_ms, derived from self.from_ms upon initialisation)
-        url = self.URL.format(product_id=self.product_ids[0], since_seconds=since_time_in_seconds)
+        url = self.URL.format(product_id=self.product_id, since_seconds=since_time_in_seconds)
 
         response = requests.request("GET", url, headers=headers, data=payload) 
         
@@ -158,31 +164,44 @@ class KrakenRestAPI:
             raise Exception (f"Kraken API error data['error'])")
                 
         # Generate the trades
-        trades = []
-        for trade in data["result"][self.product_ids[0]]:
-            trades.append({
-                'product_id': self.product_ids[0],
-                'price' : float(trade[0]),
-                'volume': float(trade[1]),
-                'timestamp' : int(trade[2]),
-                
-            })
+        # trades = []
+        # for trade in data["result"][self.product_ids[0]]:
+        #     trade_data_object = Trade(
+        #         product_id = self.product_ids[0],
+        #         price = float(trade[0]),
+        #         volume = float(trade[1]),
+        #         timestamp_ms = int(trade[2]*1000),
+        #         )
+        #     trades.append(trade_data_object)
+        # breakpoint()
+        trades = [
+            Trade(
+                    product_id=self.product_id,
+                    price=float(trade[0]),
+                    volume=float(trade[1]),
+                    timestamp_ms=int(trade[2]*1000),
+                )
 
-        #Debugger to see trades before the filtering mechanism using from_ms
+                for trade in data["result"][self.product_id]
+                
+                ]
+                
+                
+        
+        
+       
         logger.debug(f"Total amount of trades = {len(trades)}")
         logger.debug(f"Trades before filtering: {trades}")
-        # breakpoint()
+       
         
         
         # Apply Filtering
-        # Selective filter on trades to be only between the from and to milliseconds timestamps
-        trades = [trade for trade in trades if trade['timestamp'] <= self.from_ms//1000]
+        # Note: Return only the trades where the timestamp_ms attribute is greater or equal to the earliest time bound which is the to_ms variable, and no greater than the from_ms time bound
+        # trades = [trade for trade in trades if trade.timestamp_ms >= self.to_ms]
+        trades = [trade for trade in trades if self.to_ms <= trade.timestamp_ms <= self.from_ms]
         
         
-        logger.debug(f"Received {len(trades)} trades for {self.product_ids[0]}")
-
-        # breakpoint()
-        
+        logger.debug(f"Received {len(trades)} trades for {self.product_id}")      
 
         # NOTE: The last timestamp is in nanoseconds given by KrakenAPI.....making a comparision with to_ms (which is in milliseconds), units need to be converted
         
@@ -191,17 +210,10 @@ class KrakenRestAPI:
         self._is_done = self.last_trade_ms >= self.to_ms
         
         logger.debug(f'The total amount of trades recieved for this window of time = {len(trades)} ')
-        logger.debug(f'The timestamp of the latest trade in this backwards looking window is : {last_ts_in_ns}')
+        logger.debug(f'The timestamp of the EARLIEST (SMALLEST EPOCH) trade in this backwards looking window is : {last_ts_in_ns}')
         # breakpoint()
         return trades
         
     # %%
     def is_done(self) -> bool:
         return self._is_done
-    
-
-
-
-
-
-
