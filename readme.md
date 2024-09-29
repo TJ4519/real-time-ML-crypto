@@ -12,7 +12,7 @@ Needs doing:
 
 ### Feature Pipeline
 - **Trade Producer Microservice**: Runs locally and within Docker containers
-- **Trade to OHLC Conversion**: Runs locally and within Docker containers for live. NOTE: FIX Timestamp issue for historic pipeline. In historical pipeline, the timestamps for candlesticks is not the one that corresponds to their historic timestamp. It's the latest timestamp
+- **Trade to OHLC Conversion**: Runs locally and within Docker containers for live. NOTE: FIX Timestamp issue for historic pipeline. In historical pipeline, the timestamps for candlesticks is not the one that corresponds to their historic timestamp. It's the latest timestamp. 
 - **Kafka to Hopsworks**: Runs locally. Test with makefiles and dev
 
 

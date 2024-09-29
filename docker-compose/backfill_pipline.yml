@@ -1,0 +1,23 @@
+
+# TO DO Come back and fill the backfill pipeline for running historical pipeline, storing to offline feature store
+version: "3.11"
+name: backfill_pipeline
+networks:
+  name: redpanda_network
+  driver: bridge
+
+services:
+  trade_producer:
+    container_name: trade_producer
+    build:
+      context: ../services/trade_producer
+    networks:
+      -redpanda_network
+    environment:
+     KAFKA_BROKER_ADDRESS: redpanda-0:9092
+        LIVE_OR_HISTORICAL: historical  
+        PRODUCT_IDS: '["BTC/USD", "ETH/USD"]'
+        LAST_N_DAYS: 90
+        CACHE_DIR_HISTORICAL_DATA: /tmp/historical_trade_data
+    volumes:
+      - trade-producer-volume:/tmp/historical_trade_data
