@@ -3,17 +3,29 @@
 from typing import List, Optional
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
-from dotenv import load_dotenv
-load_dotenv
+# from dotenv import load_dotenv
+# load_dotenv
 
 
 class Config(BaseSettings):
+    #historical config:
+
     kafka_broker_address: Optional[str] = "localhost:19092"  # remove for prod
     kafka_topic_name: str = "trade_historical" # remove for prod 'trade_historical' for historical
-    product_ids: List[str] = ["BTC/USD", "ETH/USD"] # remove for prod
+    product_ids: List[str] = ["BTC/USD","BTC/EUR","ETH/EUR"] # remove for prod
     live_or_historical: str = "historical" # remove for prod 
     last_n_days: Optional[int] = 1 # remove for prod
-    cache_dir_historical_data: Optional[str] = None # remove for prod
+    cache_dir: Optional[str] = None # remove for prod
+
+
+    #live:
+    # kafka_broker_address: Optional[str] = "localhost:19092"  # remove for prod
+    # kafka_topic_name: str = "trade" # remove for prod 'trade_historical' for historical
+    # product_ids: List[str] = ["BTC/USD","BTC/EUR","ETH/EUR"] # remove for prod
+    # live_or_historical: str = "live" # remove for prod 
+    # last_n_days: Optional[int] = 1 # remove for prod
+    # cache_dir: Optional[str] = None # remove for prod
+
 
     @field_validator('live_or_historical')
     @classmethod

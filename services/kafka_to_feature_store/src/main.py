@@ -29,10 +29,10 @@ def kafka_to_feature_store(
         kafka_broker_address: str,
         feature_group_name: str,
         feature_store_version: int,
-        buffer_size: int,
-        live_or_historical: str, 
-        save_every_n_sec: int,
-        create_new_consumer_group: bool,
+        buffer_size: Optional[int]=1,
+        live_or_historical: Optional[str]='live', 
+        save_every_n_sec: Optional[int] = 600,
+        create_new_consumer_group: Optional[bool]=False,
 
 
 ) -> None:
@@ -149,7 +149,7 @@ if __name__== '__main__':
         kafka_topic=config_kafka_to_hops.kafka_topic_name,
         kafka_broker_address=config_kafka_to_hops.kafka_broker_address,
         feature_group_name=config_kafka_to_hops.feature_group_name,
-        feature_store_version=config_kafka_to_hops.feature_store_version,
+        feature_store_version=config_kafka_to_hops.feature_group_version,
         live_or_historical = config_kafka_to_hops.live_or_historical,
 
         buffer_size= config_kafka_to_hops.buffer_size,

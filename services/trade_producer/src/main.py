@@ -9,6 +9,7 @@ from src.kraken_api.websocket import KrakenWebsocketTradeAPI
 from src.kraken_api.restapi import KrakenRestAPI
 from src.kraken_api.restapi import KrakenRestAPIMultipleProducts
 from src.kraken_api.trade import Trade
+from typing import Optional
 import json
 
 def produce_trades(kaka_broker_address: str, 
@@ -16,6 +17,7 @@ def produce_trades(kaka_broker_address: str,
                    product_ids: List[str], #Updated from a single element str variable of product_id which is passed from the config.py. product_id: str
                    live_or_historical: str,
                    last_n_days: str,
+                   cache_dir: Optional[str],
                    ) -> None:
     """
     Reads trades from the Kraken APIs and saves them into a Kafka topic
@@ -51,6 +53,7 @@ def produce_trades(kaka_broker_address: str,
         #                            )
         kraken_api = KrakenRestAPIMultipleProducts(product_ids=product_ids,
                                    last_n_days = last_n_days,
+                                   cache_dir= cache_dir,
                                    )
 
 
@@ -63,7 +66,7 @@ def produce_trades(kaka_broker_address: str,
     # and uses the hidden _is_done condition to stop when the last timestamp hits the to_ms mark at which point the break is hit insde the while true 
     with app.get_producer() as producer:
         while True:
-            
+            #breakpoint()
             # An if statement to allow breaks in the while True for historical data fetching which does need to switch from on to off once the history is fetched
             if kraken_api.is_done():
                 logger.info('Done fetching')
@@ -89,12 +92,11 @@ def produce_trades(kaka_broker_address: str,
                     #key="BTC/USD",
                     key=message.key)
                 
+                logger.debug(f'{trade.model_dump()}')
+                
 
-                logger.info(f'Message sent to first kafka topic: {trade}')
+                #logger.info(f'Message sent to first kafka topic: {trade}')
 
-            # from time import sleep
-
-            #sleep(0.5)
 
 
 if __name__ == '__main__':
@@ -108,4 +110,5 @@ if __name__ == '__main__':
                    # parameters for historical backfilling using restapi 
                    live_or_historical=config_kraken_to_trade.live_or_historical,
                    last_n_days = config_kraken_to_trade.last_n_days,
+                   cache_dir=config_kraken_to_trade.cache_dir,
                    )
