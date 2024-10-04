@@ -31,6 +31,7 @@ def custom_ts_extractor(
 
     """
     return value['timestamp_ms'] #in milliseconds
+    #return value.timestamp_ms
 
 
 def trade_to_ohlc(
@@ -68,7 +69,7 @@ def trade_to_ohlc(
     app = Application(
         broker_address=kafka_broker_address,
         consumer_group=kafka_consumer_group,
-        auto_offset_reset= 'latest', 
+        auto_offset_reset= 'earliest', 
         #could pick 'latest' which tells the application to retrieve the latest messages in the input topic.
     )
 
@@ -76,11 +77,11 @@ def trade_to_ohlc(
     # Define input and output topics
     input_topic = app.topic( name=kafka_input_topic, 
                             value_serializer='json',
-                            timestamp_extractor= custom_ts_extractor,
+                            timestamp_extractor= custom_ts_extractor, #The timestamp is being extracted from the timestamp_ms key in the trade dict and not the default kafka value
                             )
     output_topic = app.topic(name=kafka_output_topic, value_serializer='json')
 
-    # Create a streamingdataframe from the serialised input and apply transformations
+    # Most important part of the data prep. Here, the incoming kafka data is turned into a dataframe; a streamingdataframe from the serialised input and apply transformations
     sdf = app.dataframe(topic=input_topic)
 
     # breakpoint()
@@ -90,12 +91,14 @@ def trade_to_ohlc(
     
     # Function that established the logic for transforming data when initialising tumbling window
     # TODO Make this more readable, could I use 
-    def _init_ohlc_candle(value: dict) -> dict: 
+    def _init_ohlc_candle(trade:dict): 
+
+        #breakpoint()
         """
         Initialise the Open-High-Low-Close candle, assigin values from to each key taken from the first values of the first trade which is the input dict.
 
         """
-        logger.debug(f"Received value for OHLC initialization: {value}")
+        logger.debug(f"Received value for OHLC initialization: {trade}")
         
         # timestamp = value.get("timestamp_ms") or value.get("time")
         # if not timestamp:
@@ -104,15 +107,18 @@ def trade_to_ohlc(
         return {
             # #"timestamp" : value["timestamp_ms"],
             # "timestamp" : timestamp,
-            "open": value["price"],
-            "high": value["price"],
-            "low": value["price"],
-            "close": value["price"],
-            "product_id" : value["product_id"],
+            "open": trade["price"],
+            "high": trade["price"],
+            "low": trade["price"],
+            "close": trade["price"],
+            "product_id" : trade["product_id"],
         }
         
+        
+    
     # Function to update the ohlc candle with a simple bubble-compare sort to update the max and min for high and low
     def _update_ohlc_candle(ohlc_candle: dict, trade: dict) -> dict:
+        #breakpoint()
         """
         Basically a bubble sort. Compare subsequent trade, i.e. the most recent trade to the one before, and adjust highs and lows.
 
@@ -132,8 +138,17 @@ def trade_to_ohlc(
    
     
     # %% Apply transformations and make candles
-    sdf = sdf.tumbling_window(duration_ms =timedelta(seconds=ohlc_windows_seconds))
-    sdf = sdf.reduce(reducer=_update_ohlc_candle, initializer=_init_ohlc_candle).current()
+    
+    #For monitoring:
+    # sdf = sdf.tumbling_window(duration_ms =timedelta(seconds=ohlc_windows_seconds))
+    # sdf = sdf.reduce(reducer=_update_ohlc_candle, initializer=_init_ohlc_candle).current()
+    
+    # For running in normal non debug mode
+    sdf = (
+        sdf.tumbling_window(duration_ms=timedelta(seconds=ohlc_windows_seconds))
+        .reduce(reducer=_update_ohlc_candle, initializer=_init_ohlc_candle)
+        .final()
+        )
 
 
     # Make candels by assigning values from the data streamed in by from the input topic:
@@ -187,7 +202,7 @@ if __name__ == '__main__':
     )
     
 
-    
+
     
 
 

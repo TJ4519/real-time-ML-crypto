@@ -20,8 +20,8 @@ run: build
 	docker run \
 		--network=redpanda_network \
 		--env KAFKA_BROKER_ADDRESS=redpanda-0:9092 \
-		--env KAFKA_INPUT_TOPIC=trade \
-		--env KAFKA_OUTPUT_TOPIC=ohlc \
+		--env KAFKA_INPUT_TOPIC_NAME=trade \
+		--env KAFKA_OUTPUT_TOPIC_NAME=ohlc \
 		--env KAFKA_CONSUMER_GROUP=trade_to_ohlc_consumer_group \
 		--env OHLC_WINDOW_SECONDS=60 \
 		trade-to-ohlc
@@ -30,8 +30,8 @@ run-historical: build
 	docker run \
 		--network=redpanda_network \
 		--env KAFKA_BROKER_ADDRESS=redpanda-0:9092 \
-		--env KAFKA_INPUT_TOPIC=trade_historical \
-		--env KAFKA_OUTPUT_TOPIC=ohlc_historical \
+		--env KAFKA_INPUT_TOPIC_NAME=trade_historical \
+		--env KAFKA_OUTPUT_TOPIC_NAME=ohlc_historical \
 		--env KAFKA_CONSUMER_GROUP=trade_to_ohlc_historical_consumer_group \
 		--env OHLC_WINDOW_SECONDS=60 \
 		trade-to-ohlc

@@ -11,7 +11,13 @@ from src.kraken_api.restapi import KrakenRestAPIMultipleProducts
 from src.kraken_api.trade import Trade
 from typing import Optional
 import json
+# import sys
+# import os
 
+# print("sys.path:", sys.path)  # This will print out all the paths Python is using
+# print("Working Directory:", os.getcwd())  # This will print the current working directory
+
+# breakpoint()
 def produce_trades(kaka_broker_address: str, 
                    kaka_topic_name: str, 
                    product_ids: List[str], #Updated from a single element str variable of product_id which is passed from the config.py. product_id: str

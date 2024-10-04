@@ -15,21 +15,32 @@ class Config(BaseSettings):
     """
 # TODO: Hard code in the variables and print statements. Ensure kafka groups also work and are populated. Ensure timestamps work for historical
 
+
+
+# For docker build:
+    # kafka_broker_address: Optional[str] = None
+    # kafka_input_topic_name: str
+    # kafka_output_topic_name: str 
+    # kafka_consumer_group: str 
+    # ohlc_windows_seconds: int
+
+
+
 # For historical:
 
-    kafka_broker_address: Optional[str] = 'localhost:19092'
-    kafka_input_topic_name: str = 'trade_historical'
-    kafka_output_topic_name: str = 'ohlc_historical'
-    kafka_consumer_group: str = 'trade_to_ohlc_historical_group'
-    ohlc_windows_seconds: int = '60'
+    # kafka_broker_address: Optional[str] = 'localhost:19092'
+    # kafka_input_topic_name: str = 'trade_historical'
+    # kafka_output_topic_name: str = 'ohlc_historical'
+    # kafka_consumer_group: str = 'trade_to_ohlc_historical_group'
+    # ohlc_windows_seconds: int = '60'
 
 # # For live
 
-    # kafka_broker_address: Optional[str] = 'localhost:19092'
-    # kafka_input_topic_name: str = 'trade'
-    # kafka_output_topic_name: str = 'ohlc'
-    # kafka_consumer_group: str = 'trade_to_ohlc_live'
-    # ohlc_windows_seconds: int = '60'
+    kafka_broker_address: Optional[str] = 'localhost:19092'
+    kafka_input_topic_name: str = 'trade'
+    kafka_output_topic_name: str = 'ohlc'
+    kafka_consumer_group: str = 'trade_to_ohlc_live'
+    ohlc_windows_seconds: int = '20'
     
 config_trade_to_ohlc = Config()
 print(f"\n--- Final Configuration ---")

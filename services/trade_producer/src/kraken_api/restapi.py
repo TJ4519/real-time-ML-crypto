@@ -22,7 +22,7 @@ class KrakenRestAPIMultipleProducts:
     def __init__(self, 
                  product_ids: List[str], 
                  last_n_days: int,
-                 n_threads: Optional[int] = 2 ,
+                 n_threads: Optional[int] = 1 ,
                  cache_dir: Optional[str] = None,
                  ) -> None:
         self.n_threads = n_threads
@@ -34,7 +34,7 @@ class KrakenRestAPIMultipleProducts:
             ]
         
 
-    def get_trades(self) -> List[dict]: 
+    def get_trades(self) -> List[Trade]: 
         """
         Bring back the collection of trades in a dictionary containing each of the currency pair object classes
         that take after the KrakenRestAPI class.

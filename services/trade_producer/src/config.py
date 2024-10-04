@@ -8,23 +8,33 @@ from pydantic import field_validator
 
 
 class Config(BaseSettings):
+
+    #For docker
+    # kafka_broker_address: Optional[str] = None
+    # kafka_topic_name: str
+    # product_ids: List[str]
+    # live_or_historical: str
+    # last_n_days: Optional[int] = 1
+    # cache_dir: Optional[str] = None
+
+
     #historical config:
 
-    kafka_broker_address: Optional[str] = "localhost:19092"  # remove for prod
-    kafka_topic_name: str = "trade_historical" # remove for prod 'trade_historical' for historical
-    product_ids: List[str] = ["BTC/USD","BTC/EUR","ETH/EUR"] # remove for prod
-    live_or_historical: str = "historical" # remove for prod 
-    last_n_days: Optional[int] = 1 # remove for prod
-    cache_dir: Optional[str] = None # remove for prod
-
-
-    #live:
     # kafka_broker_address: Optional[str] = "localhost:19092"  # remove for prod
-    # kafka_topic_name: str = "trade" # remove for prod 'trade_historical' for historical
-    # product_ids: List[str] = ["BTC/USD","BTC/EUR","ETH/EUR"] # remove for prod
-    # live_or_historical: str = "live" # remove for prod 
-    # last_n_days: Optional[int] = 1 # remove for prod
+    # kafka_topic_name: str = "trade_historical" # remove for prod 'trade_historical' for historical
+    # product_ids: List[str] = ["BTC/USD","BTC/EUR"] # remove for prod
+    # live_or_historical: str = "historical" # remove for prod 
+    # last_n_days: Optional[int] = 2 # remove for prod
     # cache_dir: Optional[str] = None # remove for prod
+
+
+    # #live:
+    kafka_broker_address: Optional[str] = "localhost:19092"  # remove for prod
+    kafka_topic_name: str = "trade" # remove for prod 'trade_historical' for historical
+    product_ids: List[str] = ["BTC/USD","BTC/EUR","ETH/EUR"] # remove for prod
+    live_or_historical: str = "live" # remove for prod 
+    last_n_days: Optional[int] = 2 # remove for prod
+    cache_dir: Optional[str] = None # remove for prod
 
 
     @field_validator('live_or_historical')

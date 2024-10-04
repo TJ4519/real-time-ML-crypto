@@ -20,7 +20,7 @@ run: build
 	docker run \
 		--network=redpanda_network \
 		-e KAFKA_BROKER_ADDRESS=redpanda-0:9092 \
-		-e KAFKA_TOPIC=trade \
+		-e KAFKA_TOPIC_NAME=trade \
 		-e PRODUCT_IDS='["BTC/USD"]' \
 		-e LIVE_OR_HISTORICAL=live \
 		trade-producer
@@ -31,11 +31,11 @@ run-historical: build
 	docker run \
 		--network=redpanda_network \
 		-e KAFKA_BROKER_ADDRESS=redpanda-0:9092 \
-		-e KAFKA_TOPIC=trade_historical \
-		-e PRODUCT_IDS='["BTC/USD"]' \
+		-e KAFKA_TOPIC_NAME=trade_historical \
+		-e PRODUCT_IDS='["BTC/EUR", "ETH/USD"]' \
 		-e LIVE_OR_HISTORICAL=historical \
-		-e LAST_N_DAYS=90 \
-		-e CACHE_DIR_HISTORICAL_DATA=/tmp/historical_trade_data \
+		-e LAST_N_DAYS=2 \
+		-e CACHE_DIR=/tmp/historical_trade_data \
 		-v trade-producer-volume:/tmp/historical_trade_data \
 		trade-producer
 
