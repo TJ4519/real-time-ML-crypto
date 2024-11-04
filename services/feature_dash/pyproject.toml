@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "src"
+version = "0.1.0"
+description = ""
+authors = ["TJ4519 <tejasbirsingh@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+streamlit = "^1.38.0"
+hopsworks = "^3.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

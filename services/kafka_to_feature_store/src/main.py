@@ -49,13 +49,16 @@ def kafka_to_feature_store(
     buffer_size (int): The number of messages to read from Kafka before writing to the feature store
     live_or_historical (str): Whether we are saving live data to the Feature or historical data.Livde data goes to the online feature store, whilst historical data goes to the offline feature store
     save_every_n_sec (int): In the event where data streaming is rate limited, this defines the maximum number of seconds to wait before writing the data to the feature store. Additional conditional check along with buffer_size
-    create_new_consumer_group (bool): Whether to create a new consumer group or not
+    create_new_consumer_group (bool): bool for creating a fresh consumer group 
 
     Return:
     None
 
     """
-
+    # If data
+    # Below is the logic instatiate a new consumer group, which is useful when the ingestion jobs fail and hence, the transfer to hopsworks from the topic has not been fully succesfull.
+    # If ingestions jobs fail, the consumer group might 'see' all the data from the topic, but not be able to pass it to hopsworks
+    # So, in this case, need to generate a new kafka consumer group, that takes all the data held in the topics, and writes from the earliest possible trade into hopsworks
 
     # New consumer group generation logic
     if create_new_consumer_group:
@@ -106,6 +109,10 @@ def kafka_to_feature_store(
                 # below creates the candle sticks objects that is serialised in nature, and is written into a buffer/batch
                 if msg is not None:
                     ohlc_candle_sticks = json.loads(msg.value().decode('utf-8'))
+                    
+                    # NOTE: Debug and check types as hopsworks is throwing a fit 
+                    # breakpoint()
+
                     buffer.append(ohlc_candle_sticks)
                     logger.debug(f'Message {ohlc_candle_sticks} added to buffer. Buffer size={len(buffer)}')
                 # Once the serialised ohlc data, which is appended into the buffer exceeds the buffer size or the customisable time window for no error + no messages as per save_every_n_sec, then push to feature store

@@ -2,22 +2,50 @@
 # TO DO Come back and fill the backfill pipeline for running historical pipeline, storing to offline feature store
 version: "3.11"
 name: backfill_pipeline
-networks:
-  name: redpanda_network
-  driver: bridge
 
-services:
+networks:
+  redpanda_network:
+    external: true
+
+volumes:
+  trade-producer-volume:
+
+services:  
   trade_producer:
-    container_name: trade_producer
+    # container_name: trade_producer
     build:
       context: ../services/trade_producer
     networks:
-      -redpanda_network
+      - redpanda_network
+    env_file:
+      - ../services/trade_producer/setup_historical_config.sh
     environment:
-     KAFKA_BROKER_ADDRESS: redpanda-0:9092
-        LIVE_OR_HISTORICAL: historical  
-        PRODUCT_IDS: '["BTC/USD", "ETH/USD"]'
-        LAST_N_DAYS: 90
-        CACHE_DIR_HISTORICAL_DATA: /tmp/historical_trade_data
+      KAFKA_BROKER_ADDRESS: redpanda-0:9092
     volumes:
       - trade-producer-volume:/tmp/historical_trade_data
+    restart: on-failure
+
+  trade_to_ohlc:
+    # container_name: trade_to_ohlc
+    build:
+      context: ../services/trade_to_ohlc
+    networks:
+      - redpanda_network
+    environment:
+      KAFKA_BROKER_ADDRESS: redpanda-0:9092
+    env_file:
+      - ../services/trade_to_ohlc/setup_historical_config.sh
+    restart: always
+
+  kafka_to_feature_store:
+    # container_name: kafka_to_feature_store
+    build:
+      context: ../services/kafka_to_feature_store
+    networks:
+      - redpanda_network
+    environment:
+      KAFKA_BROKER_ADDRESS: redpanda-0:9092
+    env_file:
+      - ../services/kafka_to_feature_store/setup_historical_config.sh
+      - ../services/kafka_to_feature_store/setup_credentials.sh
+    restart: always

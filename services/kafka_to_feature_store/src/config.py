@@ -9,18 +9,41 @@ load_dotenv(find_dotenv())  # Ensure this is called to load .env
 
 class Config(BaseSettings):
 
+    #FOR Docker:
+    # kafka_broker_address: Optional[str] = None
+    # kafka_topic_name: str 
+    # kafka_consumer_group: str 
+    # feature_group_name: str 
+    # feature_group_version: int
+
+    # # by default we want our `kafka_to_feature_store` service to run in live mode
+    # live_or_historical: str = 'live'
+
+    # # buffer size to store messages before writing to the feature store
+    # buffer_size: int
+
+    # # force save to feature store every n seconds
+    # save_every_n_sec: int = 600
+
+    # # whether to create a new consumer group or not
+    # create_new_consumer_group: bool = False
+    
+    # # required to authenticate with Hopsworks API
+    # hopsworks_project_name: str
+    # hopsworks_api_key: str
+
     # # historical
     kafka_broker_address: Optional[str] = 'localhost:19092'
     kafka_topic_name: str = 'ohlc_historical'
     kafka_consumer_group: str = 'trade_to_ohlc_historical_group'
-    feature_group_name: str = 'ohlc_feature_group'
-    feature_group_version: int = 2
+    feature_group_name: str = 'ohlc_feature_group_v5' #from v4
+    feature_group_version: int = 1
 
     # by default we want our `kafka_to_feature_store` service to run in live mode
     live_or_historical: str = 'historical'
 
     # buffer size to store messages before writing to the feature store
-    buffer_size: int = 150000
+    buffer_size: int = 200_000
 
     # force save to feature store every n seconds
     save_every_n_sec: int = 30
@@ -39,19 +62,20 @@ class Config(BaseSettings):
     # kafka_broker_address: Optional[str] = 'localhost:19092'
     # kafka_topic_name: str = 'ohlc'
     # kafka_consumer_group: str = 'trade_to_ohlc_live'
-    # feature_group_name: str = 'ohlc_feature_group'
-    # feature_group_version: int = 2
+    # # feature_group_name: str = 'ohlc_feature_group' 
+    # feature_group_name: str ='ohlc_feature_group_v3'
+    # feature_group_version: int = 1 #changed from 4
 
     # # by default we want our `kafka_to_feature_store` service to run in live mode
-    # live_or_historical: str = 'historical'
+    # live_or_historical: str = 'live'
 
     # # buffer size to store messages before writing to the feature store
-    # buffer_size: int = 150000
+    # buffer_size: int = 20
 
     # # force save to feature store every n seconds
     # save_every_n_sec: int = 30
 
-    # # whether to create a new consumer group or not
+    # # whether to create a new consumer group or not, default to false--flip to true if some ingestion failure to hopsworks causes not  all the data in the topics to land into hopsowkr
     # create_new_consumer_group: bool = False
     
     # # required to authenticate with Hopsworks API

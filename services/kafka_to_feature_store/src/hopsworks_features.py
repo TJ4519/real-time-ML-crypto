@@ -49,14 +49,15 @@ def push_data_to_feature_store(
     # breakpoint()
 
     # Transform the data, which is a list of dicts into a dataframe. Why? Because Hopsworks feature stores don't use dicts, but are compatiable with pandas dataframes. Input data as a list of dictionaries not just dictionary - ValueError otherwise
-    data = pd.DataFrame([data])
+    data = pd.DataFrame(data)
     
     # Write the data to the feature group
     ohlc_feature_group.insert(
         data,
         write_options=
         {
-            "start_offline_materialization": True if online_or_offline == "offline" else False  
+            #"start_offline_materialization": True if online_or_offline == "offline" else False 
+            "start_offline_materialization": True if online_or_offline == "offline" else False 
         }
         
     )
